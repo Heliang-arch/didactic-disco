@@ -7,6 +7,10 @@ import {
   SlidersOutlined,
   FileTextOutlined,
   ShoppingCartOutlined,
+  BarChartOutlined,
+  LineChartOutlined,
+  DollarOutlined,
+  FundProjectionScreenOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -18,12 +22,28 @@ const menuItems = [
   { key: '/blending', icon: <SlidersOutlined />, label: '配比管理' },
   { key: '/contract', icon: <FileTextOutlined />, label: '合同指标' },
   { key: '/inventory', icon: <ShoppingCartOutlined />, label: '库存价格' },
+  {
+    key: 'inventory-analysis-group',
+    icon: <BarChartOutlined />,
+    label: '库存分析',
+    children: [
+      { key: '/inventory-board', icon: <ShoppingCartOutlined />, label: '库存看板' },
+      { key: '/supply-analysis', icon: <LineChartOutlined />, label: '供应分析' },
+      { key: '/cost-optimization', icon: <DollarOutlined />, label: '成本优化' },
+      { key: '/demand-forecast', icon: <FundProjectionScreenOutlined />, label: '需求预测' },
+    ],
+  },
 ];
 
 export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+
+  // 找到当前路径对应的openKeys
+  const openKeys = location.pathname.startsWith('/inventory-') || location.pathname.startsWith('/supply-') || location.pathname.startsWith('/cost-') || location.pathname.startsWith('/demand-')
+    ? ['inventory-analysis-group']
+    : [];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -52,8 +72,11 @@ export default function MainLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
+          defaultOpenKeys={openKeys}
           items={menuItems}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => {
+            if (key.startsWith('/')) navigate(key);
+          }}
           style={{ background: 'transparent', borderInlineEnd: 'none' }}
         />
       </Sider>

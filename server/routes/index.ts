@@ -4,6 +4,11 @@ import blendingRouter from './blending';
 import contractRouter from './contract';
 import inventoryRouter from './inventory';
 import dashboardRouter from './dashboard';
+import shipmentRouter from './shipment';
+import inventoryAnalysisRouter from './inventory-analysis';
+import supplyAnalysisRouter from './supply-analysis';
+import costOptimizationRouter from './cost-optimization';
+import demandForecastRouter from './demand-forecast';
 
 const router = Router();
 
@@ -13,6 +18,11 @@ router.use(blendingRouter);
 router.use(contractRouter);
 router.use(inventoryRouter);
 router.use(dashboardRouter);
+router.use(shipmentRouter);
+router.use(inventoryAnalysisRouter);
+router.use(supplyAnalysisRouter);
+router.use(costOptimizationRouter);
+router.use(demandForecastRouter);
 
 // 健康检查
 router.get('/api/health', (_req, res) => {

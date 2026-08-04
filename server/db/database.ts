@@ -29,6 +29,7 @@ function initSchema(db: Database.Database): void {
       code TEXT NOT NULL UNIQUE,
       name TEXT NOT NULL,
       parent_code TEXT,
+      safety_threshold REAL DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now','localtime')),
       updated_at TEXT DEFAULT (datetime('now','localtime'))
     );
@@ -120,7 +121,42 @@ function initSchema(db: Database.Database): void {
       created_at TEXT DEFAULT (datetime('now','localtime')),
       updated_at TEXT DEFAULT (datetime('now','localtime'))
     );
+
+    -- 发运记录表
+    CREATE TABLE IF NOT EXISTS shipment (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      coal_name TEXT NOT NULL,
+      ship_date TEXT NOT NULL,
+      quantity REAL NOT NULL DEFAULT 0,
+      batch_no TEXT,
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    -- 初始库存表
+    CREATE TABLE IF NOT EXISTS initial_stock (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      coal_name TEXT NOT NULL UNIQUE,
+      initial_qty REAL NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    -- 持有成本参数配置
+    CREATE TABLE IF NOT EXISTS holding_cost_params (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      daily_rate REAL NOT NULL DEFAULT 0.001,
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    );
   `);
+
+  // 安全迁移：为已存在的coal_kind表添加safety_threshold列（如果不存在）
+  try {
+    db.exec(`ALTER TABLE coal_kind ADD COLUMN safety_threshold REAL DEFAULT 0`);
+  } catch {
+    // 列已存在，忽略
+  }
 }
 
 export function closeDb(): void {

@@ -110,5 +110,55 @@ export function seedData(): void {
     insertContract.run(c.date, c.furnace_group, c.m40, c.m25, c.m10, c.csr, c.cri, c.ad, c.v, c.s);
   }
 
+  // === 新增：发运记录（近30天模拟数据）===
+  const coalNames = ['山西焦煤', '河北焦煤', '山西肥煤', '山西瘦煤', '山西气煤', '1/3焦煤-山西'];
+  const insertShipment = db.prepare('INSERT INTO shipment (coal_name, ship_date, quantity, batch_no) VALUES (?, ?, ?, ?)');
+  const today = new Date('2025-08-01');
+  for (let d = 0; d < 30; d++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - d);
+    const dateStr = date.toISOString().split('T')[0];
+    for (const cn of coalNames) {
+      // 不同煤种发运频率不同（模拟供应差异）
+      const rand = Math.random();
+      if (cn === '山西气煤' && rand < 0.4) continue; // 气煤供应不稳定
+      if (cn === '山西瘦煤' && rand < 0.3) continue;
+      const qty = cn === '山西焦煤' ? 800 + Math.round(Math.random() * 400)
+        : cn === '河北焦煤' ? 600 + Math.round(Math.random() * 300)
+        : cn === '山西肥煤' ? 400 + Math.round(Math.random() * 200)
+        : cn === '山西瘦煤' ? 200 + Math.round(Math.random() * 150)
+        : cn === '山西气煤' ? 100 + Math.round(Math.random() * 100)
+        : 500 + Math.round(Math.random() * 250);
+      const batch = `B${dateStr.replace(/-/g, '')}-${cn.substring(0, 2)}`;
+      insertShipment.run(cn, dateStr, qty, batch);
+    }
+  }
+
+  // === 新增：初始库存 ===
+  const insertInitStock = db.prepare('INSERT INTO initial_stock (coal_name, initial_qty) VALUES (?, ?)');
+  const initStocks = [
+    { coal_name: '山西焦煤', initial_qty: 15000 },
+    { coal_name: '河北焦煤', initial_qty: 12000 },
+    { coal_name: '山西肥煤', initial_qty: 8000 },
+    { coal_name: '山西瘦煤', initial_qty: 5000 },
+    { coal_name: '山西气煤', initial_qty: 3000 },
+    { coal_name: '1/3焦煤-山西', initial_qty: 10000 },
+  ];
+  for (const s of initStocks) {
+    insertInitStock.run(s.coal_name, s.initial_qty);
+  }
+
+  // === 新增：持有成本参数 ===
+  db.prepare('INSERT INTO holding_cost_params (daily_rate) VALUES (?)').run(0.001);
+
+  // === 新增：煤种安全阈值 ===
+  const updateThreshold = db.prepare('UPDATE coal_kind SET safety_threshold=? WHERE code=?');
+  updateThreshold.run(2000, 'A01'); // 主焦煤
+  updateThreshold.run(1500, 'A02'); // 优质焦煤
+  updateThreshold.run(1000, 'B01'); // 主肥煤
+  updateThreshold.run(800, 'C01');  // 主瘦煤
+  updateThreshold.run(500, 'D01');  // 主气煤
+  updateThreshold.run(1200, 'E01'); // 1/3主焦煤
+
   console.log('✅ Seed data inserted successfully');
 }

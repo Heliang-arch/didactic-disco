@@ -5,6 +5,10 @@ import CoalKind from './pages/CoalKind';
 import Blending from './pages/Blending';
 import Contract from './pages/Contract';
 import Inventory from './pages/Inventory';
+import InventoryBoard from './pages/InventoryBoard';
+import SupplyAnalysis from './pages/SupplyAnalysis';
+import CostOptimization from './pages/CostOptimization';
+import DemandForecast from './pages/DemandForecast';
 
 export default function App() {
   return (
@@ -16,6 +20,10 @@ export default function App() {
         <Route path="blending" element={<Blending />} />
         <Route path="contract" element={<Contract />} />
         <Route path="inventory" element={<Inventory />} />
+        <Route path="inventory-board" element={<InventoryBoard />} />
+        <Route path="supply-analysis" element={<SupplyAnalysis />} />
+        <Route path="cost-optimization" element={<CostOptimization />} />
+        <Route path="demand-forecast" element={<DemandForecast />} />
       </Route>
     </Routes>
   );

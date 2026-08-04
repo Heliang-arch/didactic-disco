@@ -68,4 +68,42 @@ export const api = {
 
   // 仪表盘
   getDashboard: () => request<any>('/api/dashboard'),
+
+  // === 库存分析 ===
+  getInventoryBoard: () => request<any>('/api/inventory-analysis/board'),
+  getInventoryAlerts: () => request<any>('/api/inventory-analysis/alerts'),
+  getInventoryDepletion: () => request<any>('/api/inventory-analysis/depletion'),
+  getInventoryStructureTrend: () => request<any>('/api/inventory-analysis/structure-trend'),
+  getQualityRisk: () => request<any>('/api/inventory-analysis/quality-risk'),
+
+  // === 供应分析 ===
+  getSupplyReliability: () => request<any[]>('/api/supply-analysis/reliability'),
+  getSupplyTrend: (coalName: string) => request<any>(`/api/supply-analysis/trend/${encodeURIComponent(coalName)}`),
+  getSupplyFrequency: () => request<any[]>('/api/supply-analysis/frequency'),
+
+  // === 成本优化 ===
+  getComprehensiveCost: () => request<any>('/api/cost-optimization/comprehensive'),
+  optimizeByCost: (data: any) => request<any>('/api/cost-optimization/optimize', { method: 'POST', body: JSON.stringify(data) }),
+  calcSensitivity: (data: any) => request<any>('/api/cost-optimization/sensitivity', { method: 'POST', body: JSON.stringify(data) }),
+
+  // === 需求预测 ===
+  getDemandForecast: () => request<any[]>('/api/demand-forecast'),
+  getDemandForecastByCoal: (coalName: string) => request<any>(`/api/demand-forecast/${encodeURIComponent(coalName)}`),
+  getDemandForecastSummary: () => request<any[]>('/api/demand-forecast/summary'),
+
+  // === 发运记录 ===
+  getShipments: (params?: any) => {
+    const q = new URLSearchParams(params).toString();
+    return request<any[]>(`/api/shipments${q ? '?' + q : ''}`);
+  },
+  createShipment: (data: any) => request('/api/shipments', { method: 'POST', body: JSON.stringify(data) }),
+  deleteShipment: (id: number) => request(`/api/shipments/${id}`, { method: 'DELETE' }),
+
+  // === 初始库存 ===
+  getInitialStocks: () => request<any[]>('/api/initial-stocks'),
+  createInitialStock: (data: any) => request('/api/initial-stocks', { method: 'POST', body: JSON.stringify(data) }),
+
+  // === 持有成本参数 ===
+  getHoldingCostParams: () => request<any>('/api/holding-cost-params'),
+  updateHoldingCostParams: (data: any) => request('/api/holding-cost-params', { method: 'POST', body: JSON.stringify(data) }),
 };

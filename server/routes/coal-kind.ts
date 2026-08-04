@@ -24,14 +24,15 @@ router.get('/api/coal-kinds/tree', (_req: Request, res: Response) => {
 
 // 添加煤种分类
 router.post('/api/coal-kinds', (req: Request, res: Response) => {
-  const { code, name, parent_code } = req.body;
+  const { code, name, parent_code, safety_threshold } = req.body;
   if (!code || !name) {
     res.status(400).json({ success: false, error: '编码和名称为必填项' });
     return;
   }
   const db = getDb();
   try {
-    db.prepare('INSERT INTO coal_kind (code, name, parent_code) VALUES (?, ?, ?)').run(code, name, parent_code || null);
+    db.prepare('INSERT INTO coal_kind (code, name, parent_code, safety_threshold) VALUES (?, ?, ?, ?)')
+      .run(code, name, parent_code || null, safety_threshold || 0);
     res.json({ success: true });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
@@ -41,11 +42,11 @@ router.post('/api/coal-kinds', (req: Request, res: Response) => {
 // 更新煤种分类
 router.put('/api/coal-kinds/:id', (req: Request, res: Response) => {
   const { id } = req.params;
-  const { code, name, parent_code } = req.body;
+  const { code, name, parent_code, safety_threshold } = req.body;
   const db = getDb();
   try {
-    db.prepare('UPDATE coal_kind SET code=?, name=?, parent_code=?, updated_at=datetime(\'now\',\'localtime\') WHERE id=?')
-      .run(code, name, parent_code || null, id);
+    db.prepare(`UPDATE coal_kind SET code=?, name=?, parent_code=?, safety_threshold=?, updated_at=datetime('now','localtime') WHERE id=?`)
+      .run(code, name, parent_code || null, safety_threshold || 0, id);
     res.json({ success: true });
   } catch (err: any) {
     res.status(400).json({ success: false, error: err.message });
