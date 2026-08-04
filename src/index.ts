@@ -1,5 +1,4 @@
 import './index.css';
-import { initApp } from './main';
+import './index.tsx';
 
-// Initialize the application
-initApp();
+export {};

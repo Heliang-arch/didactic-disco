@@ -5,10 +5,12 @@ import { createServer, type Server } from 'http';
 import express from 'express';
 import router from './routes/index';
 import { setupVite } from './vite';
+import { seedData } from './db/seed';
 
 const isDev = process.env.COZE_PROJECT_ENV !== 'PROD';
-const port = parseInt(process.env.PORT || '5000', 10);
+const port = parseInt(process.env.DEPLOY_RUN_PORT || process.env.PORT || '5000', 10);
 const hostname = process.env.HOSTNAME || 'localhost';
+const resolvedHost = process.env.COZE_PROJECT_DOMAIN_DEFAULT || hostname;
 const app = express();
 // 使用 http.createServer 包装 Express app，以便支持 WebSocket 等协议升级
 const server = createServer(app);
@@ -29,6 +31,9 @@ async function startServer(): Promise<Server> {
   // 添加请求体解析
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // 初始化种子数据
+  seedData();
 
   // 注册 API 路由
   app.use(router);

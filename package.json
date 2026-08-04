@@ -14,15 +14,28 @@
     "validate": "pnpm dlx concurrently --group --names lint-tsc,lint-build,lint-style \"pnpm ts-check\" \"pnpm lint:build\" \"pnpm lint:style\""
   },
   "dependencies": {
+    "@ant-design/icons": "^6.3.2",
     "@supabase/supabase-js": "2.95.3",
+    "@types/better-sqlite3": "^9.6.0",
+    "antd": "^6.5.3",
+    "better-sqlite3": "^13.0.2",
+    "dayjs": "^1.11.21",
     "dotenv": "^17.2.3",
-    "express": "^4.21.2"
+    "echarts": "^6.1.0",
+    "echarts-for-react": "^3.0.6",
+    "express": "^4.21.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "autoprefixer": "^10.4.20",
-    "coze-coding-dev-sdk": "^0.7.16",
+    "coze-coding-dev-sdk": "^0.7.24",
     "esbuild": "^0.24.2",
     "eslint": "^9",
     "eslint-plugin-import": "^2.32.0",
