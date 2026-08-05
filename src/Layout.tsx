@@ -11,6 +11,8 @@ import {
   LineChartOutlined,
   DollarOutlined,
   FundProjectionScreenOutlined,
+  CalendarOutlined,
+  ScheduleOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -20,8 +22,10 @@ const menuItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
   { key: '/coal-kind', icon: <ApartmentOutlined />, label: '煤种字典' },
   { key: '/blending', icon: <SlidersOutlined />, label: '配比管理' },
+  { key: '/scheduling', icon: <ScheduleOutlined />, label: '排程优化' },
   { key: '/contract', icon: <FileTextOutlined />, label: '合同指标' },
   { key: '/inventory', icon: <ShoppingCartOutlined />, label: '库存价格' },
+  { key: '/arrival-plan', icon: <CalendarOutlined />, label: '到货计划' },
   {
     key: 'inventory-analysis-group',
     icon: <BarChartOutlined />,
@@ -40,7 +44,6 @@ export default function MainLayout() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
-  // 找到当前路径对应的openKeys
   const openKeys = location.pathname.startsWith('/inventory-') || location.pathname.startsWith('/supply-') || location.pathname.startsWith('/cost-') || location.pathname.startsWith('/demand-')
     ? ['inventory-analysis-group']
     : [];

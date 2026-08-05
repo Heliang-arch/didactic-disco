@@ -106,4 +106,28 @@ export const api = {
   // === 持有成本参数 ===
   getHoldingCostParams: () => request<any>('/api/holding-cost-params'),
   updateHoldingCostParams: (data: any) => request('/api/holding-cost-params', { method: 'POST', body: JSON.stringify(data) }),
+
+  // === 排程优化 ===
+  getScheduling: () => request<any>('/api/scheduling'),
+  runScheduling: (data: any) => request<any>('/api/scheduling/run', { method: 'POST', body: JSON.stringify(data) }),
+  getSchedulingHistory: () => request<any[]>('/api/scheduling/history'),
+
+  // === 到货计划 ===
+  getArrivalPlans: () => request<any[]>('/api/arrival-plan'),
+  createArrivalPlan: (data: any) => request('/api/arrival-plan', { method: 'POST', body: JSON.stringify(data) }),
+  updateArrivalPlan: (id: number, data: any) => request(`/api/arrival-plan/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteArrivalPlan: (id: number) => request(`/api/arrival-plan/${id}`, { method: 'DELETE' }),
+};
+
+export const apiClient = { get: (url: string) => request(url) };
+export const arrivalPlanApi = {
+  list: () => api.getArrivalPlans(),
+  create: (data: any) => api.createArrivalPlan(data),
+  update: (id: number, data: any) => api.updateArrivalPlan(id, data),
+  delete: (id: number) => api.deleteArrivalPlan(id),
+};
+export const schedulingApi = {
+  getConfig: () => api.getScheduling(),
+  run: (data: any) => api.runScheduling(data),
+  getHistory: () => api.getSchedulingHistory(),
 };

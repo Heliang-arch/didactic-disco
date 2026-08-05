@@ -30,6 +30,8 @@ function initSchema(db: Database.Database): void {
       name TEXT NOT NULL,
       parent_code TEXT,
       safety_threshold REAL DEFAULT 0,
+      warning_threshold REAL DEFAULT 0,
+      critical_threshold REAL DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now','localtime')),
       updated_at TEXT DEFAULT (datetime('now','localtime'))
     );
@@ -149,14 +151,44 @@ function initSchema(db: Database.Database): void {
       created_at TEXT DEFAULT (datetime('now','localtime')),
       updated_at TEXT DEFAULT (datetime('now','localtime'))
     );
+
+    -- 到货计划表（2.0新增）
+    CREATE TABLE IF NOT EXISTS coal_arrival_plan (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      coal_name TEXT NOT NULL,
+      arrival_date TEXT NOT NULL,
+      quantity REAL NOT NULL DEFAULT 0,
+      source TEXT DEFAULT 'manual',
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    -- 排程历史表（2.0新增）
+    CREATE TABLE IF NOT EXISTS schedule_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      schedule_date TEXT NOT NULL,
+      furnace_group TEXT NOT NULL,
+      formula_json TEXT NOT NULL,
+      cost REAL DEFAULT 0,
+      conversion_flag INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+
+    -- 排程配置表（2.0新增）
+    CREATE TABLE IF NOT EXISTS schedule_config (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT NOT NULL UNIQUE,
+      value TEXT NOT NULL,
+      description TEXT,
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    );
   `);
 
-  // 安全迁移：为已存在的coal_kind表添加safety_threshold列（如果不存在）
-  try {
-    db.exec(`ALTER TABLE coal_kind ADD COLUMN safety_threshold REAL DEFAULT 0`);
-  } catch {
-    // 列已存在，忽略
-  }
+  // 安全迁移：为已存在的coal_kind表添加新列
+  try { db.exec(`ALTER TABLE coal_kind ADD COLUMN warning_threshold REAL DEFAULT 0`); } catch { /* 列已存在 */ }
+  try { db.exec(`ALTER TABLE coal_kind ADD COLUMN critical_threshold REAL DEFAULT 0`); } catch { /* 列已存在 */ }
 }
 
 export function closeDb(): void {

@@ -9,6 +9,8 @@ import inventoryAnalysisRouter from './inventory-analysis';
 import supplyAnalysisRouter from './supply-analysis';
 import costOptimizationRouter from './cost-optimization';
 import demandForecastRouter from './demand-forecast';
+import schedulingRouter from './scheduling';
+import arrivalPlanRouter from './arrival-plan';
 
 const router = Router();
 
@@ -23,6 +25,8 @@ router.use(inventoryAnalysisRouter);
 router.use(supplyAnalysisRouter);
 router.use(costOptimizationRouter);
 router.use(demandForecastRouter);
+router.use(schedulingRouter);
+router.use(arrivalPlanRouter);
 
 // 健康检查
 router.get('/api/health', (_req, res) => {

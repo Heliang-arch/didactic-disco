@@ -37,14 +37,20 @@ router.get('/api/inventory-analysis/board', (_req: Request, res: Response) => {
   `).all() as any[];
   const thresholdMap = new Map(coalKinds.map(k => [k.coal_name, { threshold: k.safety_threshold || 0, kind_name: k.kind_name }]));
 
-  // 计算各煤种当前库存
+  // 计算各煤种当前库存（含三级预警）
   const board = initialStocks.map(s => {
     const shipped = shipmentMap.get(s.coal_name) || 0;
     const currentStock = Math.max(0, s.initial_qty - shipped);
     const threshold = thresholdMap.get(s.coal_name)?.threshold || 0;
     const kindName = thresholdMap.get(s.coal_name)?.kind_name || '';
+    const criticalLine = threshold * 0.5;
+    const warningLine = threshold;
     const isLow = threshold > 0 && currentStock < threshold;
     const urgency = threshold > 0 ? currentStock / threshold : 1;
+
+    let level: 'NORMAL' | 'WARNING' | 'CRITICAL' = 'NORMAL';
+    if (currentStock <= criticalLine) level = 'CRITICAL';
+    else if (currentStock <= warningLine) level = 'WARNING';
 
     return {
       coal_name: s.coal_name,
@@ -52,8 +58,11 @@ router.get('/api/inventory-analysis/board', (_req: Request, res: Response) => {
       initial_qty: s.initial_qty,
       total_shipped: shipped,
       current_stock: currentStock,
+      critical_line: Math.round(criticalLine),
+      warning_line: Math.round(warningLine),
       safety_threshold: threshold,
       is_low: isLow,
+      level,
       urgency: Math.round(urgency * 100) / 100,
       latest_record_stock: stockMap.get(s.coal_name) || 0,
     };
@@ -88,7 +97,9 @@ router.get('/api/inventory-analysis/board', (_req: Request, res: Response) => {
 });
 
 /**
- * 低库存预警
+ * 低库存预警（三级预警：NORMAL/WARNING/CRITICAL）
+ * 紧急线 = 安全阈值 × 0.5
+ * 预警线 = 安全阈值
  */
 router.get('/api/inventory-analysis/alerts', (_req: Request, res: Response) => {
   const db = getDb();
@@ -105,9 +116,29 @@ router.get('/api/inventory-analysis/alerts', (_req: Request, res: Response) => {
     const currentStock = Math.max(0, s.initial_qty - (shipmentMap.get(s.coal_name) || 0));
     const threshold = thresholdMap.get(s.coal_name)?.threshold || 0;
     const kindName = thresholdMap.get(s.coal_name)?.kind_name || '';
+    const criticalLine = threshold * 0.5; // 紧急线
+    const warningLine = threshold; // 预警线
     const urgency = threshold > 0 ? currentStock / threshold : 1;
-    return { coal_name: s.coal_name, kind_name: kindName, current_stock: currentStock, safety_threshold: threshold, urgency };
-  }).filter(a => a.safety_threshold > 0 && a.current_stock < a.safety_threshold)
+
+    // 三级预警
+    let level: 'NORMAL' | 'WARNING' | 'CRITICAL' = 'NORMAL';
+    if (currentStock <= criticalLine) {
+      level = 'CRITICAL';
+    } else if (currentStock <= warningLine) {
+      level = 'WARNING';
+    }
+
+    return {
+      coal_name: s.coal_name,
+      kind_name: kindName,
+      current_stock: currentStock,
+      critical_line: Math.round(criticalLine),
+      warning_line: Math.round(warningLine),
+      safety_threshold: threshold,
+      urgency: Math.round(urgency * 100) / 100,
+      level,
+    };
+  }).filter(a => a.level !== 'NORMAL')
     .sort((a, b) => a.urgency - b.urgency);
 
   // 补货建议
@@ -117,10 +148,14 @@ router.get('/api/inventory-analysis/alerts', (_req: Request, res: Response) => {
     current_stock: a.current_stock,
     safety_threshold: a.safety_threshold,
     suggested_qty: Math.round(a.safety_threshold * 2 - a.current_stock),
-    urgency_level: a.urgency < 0.3 ? '紧急' : a.urgency < 0.7 ? '较急' : '一般',
+    urgency_level: a.level === 'CRITICAL' ? '紧急' : '较急',
   }));
 
-  res.json({ success: true, data: { alerts, suggestions } });
+  // 汇总
+  const criticalCount = alerts.filter(a => a.level === 'CRITICAL').length;
+  const warningCount = alerts.filter(a => a.level === 'WARNING').length;
+
+  res.json({ success: true, data: { alerts, suggestions, summary: { critical_count: criticalCount, warning_count: warningCount, total: alerts.length } } });
 });
 
 /**
