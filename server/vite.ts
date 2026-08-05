@@ -5,19 +5,19 @@ import type { Application, Request, Response } from 'express';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { createServer as createViteServer } from 'vite';
-import viteConfig from '../vite.config';
 
 const isDev = process.env.COZE_PROJECT_ENV !== 'PROD';
 
 /**
  * 集成 Vite 开发服务器（中间件模式）
+ * 使用动态 import 避免 Vite/React 插件被打包到 CJS bundle 中
  */
 export async function setupViteMiddleware(app: Application) {
+  // 动态导入 Vite，仅在开发模式下加载
+  const { createServer: createViteServer } = await import('vite');
+
   const vite = await createViteServer({
-    ...viteConfig,
     server: {
-      ...viteConfig.server,
       middlewareMode: true,
     },
     appType: 'spa',
