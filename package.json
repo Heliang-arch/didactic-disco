@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.2",
+    "@babel/preset-typescript": "^8.0.1",
     "@supabase/supabase-js": "2.95.3",
     "@types/better-sqlite3": "^9.6.0",
     "antd": "^6.5.3",
